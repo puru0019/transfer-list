@@ -22,6 +22,38 @@
   color: #61dafb;
 }
 
+.transfer-grid {
+  border: 1px solid #d9d9d9;
+  display: inline-block;
+  border-radius: 4px;
+  vertical-align: middle;
+  position: relative;
+  width: 250px;
+  height: 200px;
+  padding-top: 34px;
+}
+
+.transfer-list-content-item {
+  list-style: none;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding: 6px 12px;
+  min-height: 32px;
+}
+
+.transfer-list-content {
+  height: 100%;
+  overflow: auto;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.transfer-grid {
+  margin: 20px 20px;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
