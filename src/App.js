@@ -8,12 +8,33 @@ class App extends Component {
   render() {
     return (
       <div className="row">
-        <TransferList 
-          itemsList={response}
+        <TransferContainer 
+          sourceitemsList={response}
+          destinationitemsList={response}
+          sourceTitle="Soruce"
+          destinationTitle="Destination"
+          showSearch={true}
         />
       </div>
     );
   }
+}
+
+const TransferContainer = ({ sourceitemsList, destinationitemsList, sourceTitle, destinationTitle ,showSearch }) => {
+  return (
+    <React.Fragment>
+      <TransferList 
+        itemsList={sourceitemsList}
+        showSearch={showSearch}
+        title={sourceTitle}
+      />
+      <TransferList 
+        itemsList={destinationitemsList}
+        showSearch={showSearch}
+        title={destinationTitle}
+      />
+    </React.Fragment>
+  )
 }
 
 export default App;
