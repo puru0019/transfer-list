@@ -1,96 +1,106 @@
 import React from 'react';
-import { compose, withState, withHandlers, lifecycle } from 'recompose';
+import {
+  compose, withState, withHandlers, lifecycle,
+} from 'recompose';
 
 const enchance = compose(
-    withState('initialItemList', 'setItemsList',props=> props.itemsList),
-    withState('filterItemList', 'setFilterItemsList',[]),
-    withState('checkAllStatus','setCheckAll', false),
-    withState('totalItems', 'setTotalItems', props=>props.itemsList.length),
-    withState('searchText', 'setSearchText',''),
-    withHandlers({
-        onCheckAll: ({ initialItemList, setItemsList, setCheckAll }) => async(e) => {
-            initialItemList.map(item => item.selected = e.target.checked);
-            await setCheckAll(e.target.checked);
-            await setItemsList(initialItemList);
-        },
-        handleCheckbox: ({ initialItemList, totalItems, setItemsList, setCheckAll }) => async({ target }) => {
-            let items = initialItemList.map(( item ) => { 
-                if(item.value === target.value) {
-                    item.selected = target.checked
-                }
-                return item;
-            });
-            await setItemsList(items);
-            let getStatus = getCheckAllStatus(initialItemList, totalItems);
-            getStatus ? await setCheckAll(true) : await setCheckAll(false);
-        },
-        handleFilter: ({ initialItemList, setSearchText, setFilterItemsList }) => async(e) => {
-            let updatedItems = initialItemList.filter(item => item.text.toLowerCase().search(e.target.value.toLowerCase()) !== -1);
-            await setSearchText(e.target.value);
-            await setFilterItemsList(updatedItems);
+  withState('initialItemsList', 'setItemsList', props => props.itemsList),
+  withState('filterItemsList', 'setFilterItemsList', []),
+  withState('itemsCount', 'setItemsCount', props => props.itemsList.length),
+  withState('checkAllStatus', 'setCheckAllStatus', false),
+  withState('searchText', 'setSearchText', ''),
+  withHandlers({
+    handleCheckBox: ({
+      initialItemsList, setItemsList, setCheckAllStatus, itemsCount,
+    }) => async ({ target }) => {
+      const items = initialItemsList.map((item) => {
+        if (item.value === target.value) {
+          item.selected = target.checked;
         }
-    }),
-    lifecycle({
-        componentWillMount() {
-            this.props.setFilterItemsList(this.props.initialItemList)
-        }
-    })
-)
+        return item;
+      });
+      await setItemsList(items);
+      const getCheckedCount = initialItemsList.filter(item => item.selected === true).length;
+      (itemsCount === getCheckedCount) ? await setCheckAllStatus(true) : await setCheckAllStatus(false);
+    },
+    handleAllCheckBox: ({ initialItemsList, setCheckAllStatus, setItemsList }) => async ({ target }) => {
+      initialItemsList.map(item => (item.selected = target.checked));
+      await setCheckAllStatus(target.checked);
+      await setItemsList(initialItemsList);
+    },
+    handleFilter: ({ initialItemsList, setSearchText, setFilterItemsList }) => async ({ target }) => {
+      const updatedItems = initialItemsList.filter(item => item.text.toLowerCase().search(target.value.toLowerCase()) !== -1);
+      await setSearchText(target.value);
+      await setFilterItemsList(updatedItems);
+    },
+  }),
+  lifecycle({
+    componentWillMount() {
+      this.props.setFilterItemsList(this.props.initialItemsList);
+    },
+    componentDidMount() {
+      this.props.setItemsCount(this.props.initialItemsList.length);
+    },
+  }),
+);
 
-const getCheckAllStatus = (initialItemList, totalItems) => {
-    let count = 0;
-    initialItemList.map(item => {
-        if(item.selected === true) {
-            count = count + 1;
-        }
-        return count;
-    });
-    return count === totalItems ? true : false;
-}
+const TransferListContentItem = ({ item: { text, value, selected }, handleCheckBox }) => (
+  <li className="transfer-list-content-item">
+    <label htmlFor={value}>
+      <input type="checkbox" id={value} value={value} className="transfer-checkbox" checked={selected} onChange={handleCheckBox} />
+      {text}
+    </label>
+  </li>
+);
 
-const RenderList = ({ item : { text, selected, value }, handleCheckbox}) => {
-    return (
-        <li className="transfer-list-content-item">
-            <input type="checkbox" value={value} onChange={handleCheckbox} checked={selected}/>
-            {text}
-        </li>
-    )
-}
+const TransferListContent = ({ filterItemsList, ...props }) => (
+  <ul className="transfer-list-content">
+    {
+      filterItemsList.map(item => <TransferListContentItem key={item.value} item={item} {...props} />)
+    }
+  </ul>
+);
 
-const TransferListHeader = ({ title, totalItems, showSearch, onCheckAll, searchText, checkAllStatus, handleFilter }) => {
-    return (
-        <div>
-            { showSearch && 
-                <div>
-                    <input type="text" value={searchText} onChange={handleFilter}/>
-                </div>
-            }
-            <input type="checkbox" id={`check-all`} onChange={onCheckAll} checked={checkAllStatus}/>
-            <span>{totalItems}</span>
-            <span>{title}</span>
-        </div>
-    )
-}
+const TransferListHeader = ({
+  itemsCount, checkAllStatus, handleAllCheckBox, title,
+}) => (
+  <div className="transfer-list-header">
+    <label htmlFor="check-all">
+      <input type="checkbox" id={`check-all-${title}`} checked={checkAllStatus} className="transfer-checkbox" onChange={handleAllCheckBox} />
+      {itemsCount}
+      {'  items'}
+    </label>
+  </div>
+);
 
-const TransferList = enchance(({ filterItemList, title, showSearch, onCheckAll, totalItems, searchText, handleCheckbox, handleFilter, checkAllStatus }) => {
-    return (
-    <div>
-        <h3>{title}</h3>
-        <div className="transfer-grid">
-            <TransferListHeader title="source" showSearch={showSearch} searchText={searchText} totalItems={totalItems} onCheckAll={onCheckAll} checkAllStatus={checkAllStatus} handleFilter={handleFilter}/>
-            <div className="transfer-list-body">
-                <ul className="transfer-list-content">
-                    {
-                    filterItemList && filterItemList.map(item => <RenderList key={item.value} item={item} handleCheckbox={handleCheckbox} />)
-                    }
-                    {
-                    filterItemList.length === 0 && <div>No result found</div>
-                    }
-                </ul>
-            </div>
-        </div>
+const NoResultsFound = () => (
+  <div className="transfer-list-content">
+    No results found
+  </div>
+);
+
+const TransferListSearch = ({ searchText, handleFilter }) => (
+  <div className="transfer-list-search">
+    <input type="text" value={searchText} onChange={handleFilter} />
+  </div>
+);
+
+const TransferList = enchance(({
+  filterItemsList, title, itemsCount, checkAllStatus, searchText, handleCheckBox, handleAllCheckBox, handleFilter,
+}) => (
+  <div className="root-grid">
+    <div className="transfer-list-title">
+      {title}
     </div>
-    )
-});
+    <div className="transfer-list-body">
+      <TransferListHeader itemsCount={itemsCount} checkAllStatus={checkAllStatus} handleAllCheckBox={handleAllCheckBox} title={title} />
+      <div className="transfer-list-content-body">
+        <TransferListSearch searchText={searchText} handleFilter={handleFilter} />
+        { filterItemsList.length > 0 && <TransferListContent filterItemsList={filterItemsList} handleCheckBox={handleCheckBox} />}
+        { filterItemsList.length === 0 && <NoResultsFound />}
+      </div>
+    </div>
+  </div>
+));
 
 export default TransferList;

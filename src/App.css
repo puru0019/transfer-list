@@ -21,37 +21,52 @@
 .App-link {
   color: #61dafb;
 }
-
-.transfer-grid {
-  border: 1px solid #d9d9d9;
+.root-grid {
+  margin-left: 15px;
+  width: 40%;
   display: inline-block;
-  border-radius: 4px;
-  vertical-align: middle;
-  position: relative;
-  width: 250px;
-  height: 200px;
-  padding-top: 34px;
+}
+.transfer-list-header {
+  padding: 10px 20px;
+  border-bottom: 1px solid #e8e8e8;
 }
 
-.transfer-list-content-item {
-  list-style: none;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  padding: 6px 12px;
-  min-height: 32px;
+.transfer-list-search {
+  margin: 10px 10px 0 10px;
+}
+
+.transfer-list-search input {
+  width: 100%;
+  padding: 5px 0;
+  border-radius: 5px;
+  border-style: none;
+  border: 1px solid #d9d9d9;
+}
+
+.transfer-checkbox {
+  margin-right: 8px;
+}
+
+.transfer-grid {
+  width: 40%;
+}
+
+.transfer-list-body {
+  border: 1px solid #e8e8e8;
+  border-radius: 5px;
 }
 
 .transfer-list-content {
-  height: 100%;
+  list-style-type: none;
+  padding: 5px 10px;
+  margin-top: 0px;
+  margin-bottom: 0;
+  height: 250px;
   overflow: auto;
-  list-style: none;
-  padding: 0;
-  margin: 0;
 }
 
-.transfer-grid {
-  margin: 20px 20px;
+.transfer-list-content-item {
+  padding: 10px;
 }
 
 @keyframes App-logo-spin {
