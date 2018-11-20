@@ -1,17 +1,17 @@
 import React from 'react';
 import {
-  compose, withState, withHandlers, lifecycle,
+  compose, withState, withHandlers, lifecycle, withPropsOnChange,
 } from 'recompose';
 
 const enchance = compose(
   withState('initialItemsList', 'setItemsList', props => props.itemsList),
   withState('filterItemsList', 'setFilterItemsList', []),
-  withState('itemsCount', 'setItemsCount', props => props.itemsList.length),
+  withState('itemsCount', 'setItemsCount'),
   withState('checkAllStatus', 'setCheckAllStatus', false),
   withState('searchText', 'setSearchText', ''),
   withHandlers({
     handleCheckBox: ({
-      initialItemsList, setItemsList, setCheckAllStatus, itemsCount,
+      initialItemsList, setItemsList, setCheckAllStatus, itemsCount, handleChange,
     }) => async ({ target }) => {
       const items = initialItemsList.map((item) => {
         if (item.value === target.value) {
@@ -22,24 +22,37 @@ const enchance = compose(
       await setItemsList(items);
       const getCheckedCount = initialItemsList.filter(item => item.selected === true).length;
       (itemsCount === getCheckedCount) ? await setCheckAllStatus(true) : await setCheckAllStatus(false);
+      handleChange();
     },
-    handleAllCheckBox: ({ initialItemsList, setCheckAllStatus, setItemsList }) => async ({ target }) => {
+    handleAllCheckBox: ({
+      initialItemsList, setCheckAllStatus, setItemsList, handleChange,
+    }) => async ({ target }) => {
       initialItemsList.map(item => (item.selected = target.checked));
       await setCheckAllStatus(target.checked);
       await setItemsList(initialItemsList);
+      handleChange();
     },
-    handleFilter: ({ initialItemsList, setSearchText, setFilterItemsList }) => async ({ target }) => {
+    handleFilter: ({
+      initialItemsList, setSearchText, setFilterItemsList, setItemsCount, handleChange,
+    }) => async ({ target }) => {
       const updatedItems = initialItemsList.filter(item => item.text.toLowerCase().search(target.value.toLowerCase()) !== -1);
       await setSearchText(target.value);
       await setFilterItemsList(updatedItems);
+      await setItemsCount(updatedItems.length);
+      handleChange();
     },
+  }),
+  withPropsOnChange(['itemsList'], ({
+    setFilterItemsList, itemsList, setItemsCount, setItemsList, setCheckAllStatus, searchText, filterItemsList,
+  }) => {
+    searchText ? setFilterItemsList(itemsList.filter(item => item.text.toLowerCase().search(searchText.toLowerCase()) !== -1)) : setFilterItemsList(itemsList);
+    setItemsList(itemsList);
+    setItemsCount(itemsList.length);
+    itemsList.length && itemsList.filter(item => item.selected === true).length === itemsList.length ? setCheckAllStatus(true) : setCheckAllStatus(false);
   }),
   lifecycle({
     componentWillMount() {
-      this.props.setFilterItemsList(this.props.initialItemsList);
-    },
-    componentDidMount() {
-      this.props.setItemsCount(this.props.initialItemsList.length);
+      this.props.setFilterItemsList(this.props.itemsList);
     },
   }),
 );

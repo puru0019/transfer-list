@@ -22,9 +22,9 @@
   color: #61dafb;
 }
 .root-grid {
-  margin-left: 15px;
   width: 40%;
   display: inline-block;
+  vertical-align: middle;
 }
 .transfer-list-header {
   padding: 10px 20px;
@@ -67,6 +67,30 @@
 
 .transfer-list-content-item {
   padding: 10px;
+}
+
+.transfer-operations {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: middle;
+  margin: 0 8px;
+}
+
+.transfer-operations .transfer-btn {
+  display: block;
+  padding: 5px 10px;
+  margin: 10px;
+  border: none;
+}
+
+.transfer-btn{
+  background: #096dd9;
+  color: white;
+}
+
+.transfer-btn:disabled{
+  background: #b3b5b8;
+  color: white;
 }
 
 @keyframes App-logo-spin {
