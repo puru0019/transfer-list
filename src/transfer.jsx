@@ -78,7 +78,7 @@ const TransferListHeader = ({
   itemsCount, checkAllStatus, handleAllCheckBox, title,
 }) => (
   <div className="transfer-list-header">
-    <label htmlFor="check-all">
+    <label htmlFor={`check-all-${title}`}>
       <input type="checkbox" id={`check-all-${title}`} checked={checkAllStatus} className="transfer-checkbox" onChange={handleAllCheckBox} />
       {itemsCount}
       {'  items'}
