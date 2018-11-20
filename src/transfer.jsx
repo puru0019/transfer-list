@@ -33,17 +33,16 @@ const enchance = compose(
       handleChange();
     },
     handleFilter: ({
-      initialItemsList, setSearchText, setFilterItemsList, setItemsCount, handleChange,
+      initialItemsList, setSearchText, setFilterItemsList, setItemsCount,
     }) => async ({ target }) => {
       const updatedItems = initialItemsList.filter(item => item.text.toLowerCase().search(target.value.toLowerCase()) !== -1);
       await setSearchText(target.value);
       await setFilterItemsList(updatedItems);
       await setItemsCount(updatedItems.length);
-      handleChange();
     },
   }),
   withPropsOnChange(['itemsList'], ({
-    setFilterItemsList, itemsList, setItemsCount, setItemsList, setCheckAllStatus, searchText, filterItemsList,
+    setFilterItemsList, itemsList, setItemsCount, setItemsList, setCheckAllStatus, searchText,
   }) => {
     searchText ? setFilterItemsList(itemsList.filter(item => item.text.toLowerCase().search(searchText.toLowerCase()) !== -1)) : setFilterItemsList(itemsList);
     setItemsList(itemsList);
