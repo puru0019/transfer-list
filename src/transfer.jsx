@@ -74,12 +74,12 @@ const TransferListContent = ({ filterItemsList, ...props }) => (
 );
 
 const TransferListHeader = ({
-  itemsCount, checkAllStatus, handleAllCheckBox, title,
+  itemsCount, checkAllStatus, handleAllCheckBox, title, checkedItemCount,
 }) => (
   <div className="transfer-list-header">
     <label htmlFor={`check-all-${title}`}>
       <input type="checkbox" id={`check-all-${title}`} checked={checkAllStatus} className="transfer-checkbox" onChange={handleAllCheckBox} />
-      {itemsCount}
+      {`${checkedItemCount}/${itemsCount}`}
       {'  items'}
     </label>
   </div>
@@ -99,20 +99,23 @@ const TransferListSearch = ({ searchText, handleFilter }) => (
 
 const TransferList = enchance(({
   filterItemsList, title, itemsCount, checkAllStatus, searchText, handleCheckBox, handleAllCheckBox, handleFilter,
-}) => (
-  <div className="root-grid">
-    <div className="transfer-list-title">
-      {title}
-    </div>
-    <div className="transfer-list-body">
-      <TransferListHeader itemsCount={itemsCount} checkAllStatus={checkAllStatus} handleAllCheckBox={handleAllCheckBox} title={title} />
-      <div className="transfer-list-content-body">
-        <TransferListSearch searchText={searchText} handleFilter={handleFilter} />
-        { filterItemsList.length > 0 && <TransferListContent filterItemsList={filterItemsList} handleCheckBox={handleCheckBox} />}
-        { filterItemsList.length === 0 && <NoResultsFound />}
+}) => {
+  const checkedItemCount = filterItemsList.filter(item => item.selected === true).length;
+  return (
+    <div className="root-grid">
+      <div className="transfer-list-title">
+        {title}
+      </div>
+      <div className="transfer-list-body">
+        <TransferListHeader itemsCount={itemsCount} checkedItemCount={checkedItemCount} checkAllStatus={checkAllStatus} handleAllCheckBox={handleAllCheckBox} title={title} />
+        <div className="transfer-list-content-body">
+          <TransferListSearch searchText={searchText} handleFilter={handleFilter} />
+          { filterItemsList.length > 0 && <TransferListContent filterItemsList={filterItemsList} handleCheckBox={handleCheckBox} />}
+          { filterItemsList.length === 0 && <NoResultsFound />}
+        </div>
       </div>
     </div>
-  </div>
-));
+  );
+});
 
 export default TransferList;
