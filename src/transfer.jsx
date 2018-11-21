@@ -11,42 +11,44 @@ const enchance = compose(
   withState('searchText', 'setSearchText', ''),
   withHandlers({
     handleCheckBox: ({
-      initialItemsList, setItemsList, setCheckAllStatus, itemsCount, handleChange,
+      filterItemsList, setFilterItemsList, setCheckAllStatus, itemsCount, handleChange,
     }) => async ({ target }) => {
-      const items = initialItemsList.map((item) => {
+      const items = filterItemsList.map((item) => {
         if (item.value === target.value) {
           item.selected = target.checked;
         }
         return item;
       });
-      await setItemsList(items);
-      const getCheckedCount = initialItemsList.filter(item => item.selected === true).length;
+      await setFilterItemsList(items);
+      const getCheckedCount = items.filter(item => item.selected === true).length;
       (itemsCount === getCheckedCount) ? await setCheckAllStatus(true) : await setCheckAllStatus(false);
       handleChange();
     },
     handleAllCheckBox: ({
-      initialItemsList, setCheckAllStatus, setItemsList, handleChange,
+      filterItemsList, setCheckAllStatus, setFilterItemsList, handleChange,
     }) => async ({ target }) => {
-      initialItemsList.map(item => (item.selected = target.checked));
-      await setCheckAllStatus(target.checked);
-      await setItemsList(initialItemsList);
+      filterItemsList.map(item => (item.selected = target.checked));
+      filterItemsList.length > 0 ? await setCheckAllStatus(target.checked) : await setCheckAllStatus(false);
+      await setFilterItemsList(filterItemsList);
       handleChange();
     },
     handleFilter: ({
-      initialItemsList, setSearchText, setFilterItemsList, setItemsCount,
+      initialItemsList, setSearchText, setFilterItemsList, setItemsCount, setCheckAllStatus,
     }) => async ({ target }) => {
       const updatedItems = initialItemsList.filter(item => item.text.toLowerCase().search(target.value.toLowerCase()) !== -1);
       await setSearchText(target.value);
       await setFilterItemsList(updatedItems);
       await setItemsCount(updatedItems.length);
+      updatedItems.length && updatedItems.length === updatedItems.filter(item => item.selected === true).length ? await setCheckAllStatus(true) : await setCheckAllStatus(false);
     },
   }),
   withPropsOnChange(['itemsList'], ({
     setFilterItemsList, itemsList, setItemsCount, setItemsList, setCheckAllStatus, searchText,
   }) => {
-    searchText ? setFilterItemsList(itemsList.filter(item => item.text.toLowerCase().search(searchText.toLowerCase()) !== -1)) : setFilterItemsList(itemsList);
+    const filterdItems = itemsList.filter(item => item.text.toLowerCase().search(searchText.toLowerCase()) !== -1);
+    searchText ? setFilterItemsList(filterdItems) : setFilterItemsList(itemsList);
     setItemsList(itemsList);
-    setItemsCount(itemsList.length);
+    setItemsCount(filterdItems.length);
     itemsList.length && itemsList.filter(item => item.selected === true).length === itemsList.length ? setCheckAllStatus(true) : setCheckAllStatus(false);
   }),
   lifecycle({
@@ -87,7 +89,7 @@ const TransferListHeader = ({
 
 const NoResultsFound = () => (
   <div className="transfer-list-content">
-    No results found
+    No Items
   </div>
 );
 
@@ -98,9 +100,9 @@ const TransferListSearch = ({ searchText, handleFilter }) => (
 );
 
 const TransferList = enchance(({
-  filterItemsList, title, itemsCount, checkAllStatus, searchText, handleCheckBox, handleAllCheckBox, handleFilter,
+  filterItemsList, title, itemsCount = 0, checkAllStatus, searchText, handleCheckBox, handleAllCheckBox, handleFilter, showSearch,
 }) => {
-  const checkedItemCount = filterItemsList.filter(item => item.selected === true).length;
+  const checkedItemCount = (filterItemsList.length && filterItemsList.filter(item => item.selected === true).length) || 0;
   return (
     <div className="root-grid">
       <div className="transfer-list-title">
@@ -109,7 +111,7 @@ const TransferList = enchance(({
       <div className="transfer-list-body">
         <TransferListHeader itemsCount={itemsCount} checkedItemCount={checkedItemCount} checkAllStatus={checkAllStatus} handleAllCheckBox={handleAllCheckBox} title={title} />
         <div className="transfer-list-content-body">
-          <TransferListSearch searchText={searchText} handleFilter={handleFilter} />
+          {showSearch && <TransferListSearch searchText={searchText} handleFilter={handleFilter} />}
           { filterItemsList.length > 0 && <TransferListContent filterItemsList={filterItemsList} handleCheckBox={handleCheckBox} />}
           { filterItemsList.length === 0 && <NoResultsFound />}
         </div>
